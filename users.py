@@ -3,32 +3,33 @@ import os
 
 tenant = os.environ["AAD_TENANT"]
 client_id = os.environ["CLIENT_ID"]
-username = os.environ["USERNAME"]
-password = os.environ["PASSWORD"]
+client_secret = os.environ["CLIENT_SECRET"]
 
-msft = "https://login.microsoftonline.com"
-url = f"{msft}/{tenant}/oauth2/v2.0/"
+url = f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/"
 token = f"{url}/token"
 
 res = r.post(token, 
         data=dict(
-            grant_type="password",
+            grant_type="client_credentials",
             client_id=f"{client_id}",
-            username=f"{username}",
-            password=f"{password}",
-            scope="https://graph.microsoft.com/.default"
-            ))
+            client_secret=f"{client_secret}",
+            scope="https://graph.microsoft.com/.default"))
 
 access_token = res.json()["access_token"];
 
 users = f"https://graph.microsoft.com/v1.0/users/delta"
+next_link = users 
 
-res = r.get(users, headers={
-            "Content-Type" : "application/json",
-            "Authorization" : f"Bearer {access_token}"})
+while next_link:
 
-print(res)
-print(res.json())
+    res = r.get(next_link, headers={
+                "Content-Type" : "application/json",
+                "Authorization" : f"Bearer {access_token}"})
 
+    objects = res.json()
+    next_link = objects.get("@odata.nextLink", "")
+
+    print(len(objects["value"]))
+    print(objects)
 
 
