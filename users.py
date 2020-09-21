@@ -29,7 +29,13 @@ while next_link:
     objects = res.json()
     next_link = objects.get("@odata.nextLink", "")
 
-    print(len(objects["value"]))
     print(objects)
+    print(len(objects["value"]))
+
+    if next_link:
+
+        print("Press some key.")
+        input()
+
 
 
