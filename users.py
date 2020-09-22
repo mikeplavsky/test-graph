@@ -1,5 +1,7 @@
 import requests as r
 import os
+import json
+import random
 
 tenant = os.environ["AAD_TENANT"]
 client_id = os.environ["CLIENT_ID"]
@@ -16,26 +18,61 @@ res = r.post(token,
             scope="https://graph.microsoft.com/.default"))
 
 access_token = res.json()["access_token"];
+users = f"https://graph.microsoft.com/v1.0/users/"
 
-users = f"https://graph.microsoft.com/v1.0/users/delta"
-next_link = users 
+def patch_user(id,attr,val):
 
-while next_link:
+    user = f"{users}/{id}"
 
-    res = r.get(next_link, headers={
+    res = r.patch(user, 
+            headers={
+                "Content-Type" : "application/json",
+                "Authorization" : f"Bearer {access_token}"},
+            data = json.dumps({attr: val}))
+
+    print(res)
+    print(res.text)
+
+
+def patch_all():
+
+    res = r.get(f"{users}", headers={
                 "Content-Type" : "application/json",
                 "Authorization" : f"Bearer {access_token}"})
 
-    objects = res.json()
-    next_link = objects.get("@odata.nextLink", "")
+    objs = res.json()["value"]
 
-    print(objects)
-    print(len(objects["value"]))
+    for u in objs:
 
-    if next_link:
+        id = u["id"]
+        job = u["jobTitle"]
 
-        print("Press some key.")
-        input()
+        print(f"{id}: {job}")
+
+        patch_user(id, 
+                "jobTitle", 
+                str(random.randint(0,1000)))
+
+
+def init_read():
+
+    next_link = f"{users}/delta" 
+    while next_link:
+
+        res = r.get(next_link, headers={
+                    "Content-Type" : "application/json",
+                    "Authorization" : f"Bearer {access_token}"})
+
+        objects = res.json()
+        next_link = objects.get("@odata.nextLink", "")
+
+        print(objects)
+        print(len(objects["value"]))
+
+        if next_link:
+
+            print("Press Enter.")
+            input()
 
 
 
