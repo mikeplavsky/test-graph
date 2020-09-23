@@ -56,7 +56,9 @@ def patch_all():
 
 def init_read():
 
+    delta_link = ""
     next_link = f"{users}/delta" 
+
     while next_link:
 
         res = r.get(next_link, headers={
@@ -64,7 +66,9 @@ def init_read():
                     "Authorization" : f"Bearer {access_token}"})
 
         objects = res.json()
+
         next_link = objects.get("@odata.nextLink", "")
+        delta_link = objects.get("@odata.deltaLink", "")
 
         print(objects)
         print(len(objects["value"]))
@@ -73,6 +77,32 @@ def init_read():
 
             print("Press Enter.")
             input()
+
+    return delta_link
+
+def delta_read(delta_link):
+
+    while delta_link:
+
+        res = r.get(delta_link, headers={
+                    "Content-Type" : "application/json",
+                    "Authorization" : f"Bearer {access_token}"})
+
+        objects = res.json()
+
+        delta_link = objects.get("@odata.deltaLink", "")
+        next_link = objects.get("@odata.nextLink", "")
+
+        assert(next_link or delta_link)
+
+        delta_link = next_link if next_link else delta_link
+
+        print(objects)
+        print(len(objects["value"]))
+
+        print("Press Enter.")
+        input()
+
 
 
 
