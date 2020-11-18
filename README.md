@@ -3,6 +3,8 @@ Get Service Principle:
 az ad sp create-for-rbac --skip-assignment true
 ```
 
+SP must be added to Directory Readers role. 
+
 Set up environment:
 ```
 export AAD_TENANT=...
