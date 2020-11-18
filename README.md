@@ -1,5 +1,7 @@
 Get Service Principle:
-`az ad sp create-for-rbac --skip-assignment true`
+```
+az ad sp create-for-rbac --skip-assignment true
+```
 
 Set up environment:
 ```
